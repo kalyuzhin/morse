@@ -8,4 +8,6 @@ __pycache__
 .env
 *.out
 *.log
-
+*.wav
+*.wave
+*.mp3
