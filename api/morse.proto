@@ -1,0 +1,13 @@
+syntax = 'proto3';
+
+package morse;
+
+service Morse{
+  rpc Ping(EmptyMessage) returns(EmptyMessage){
+
+  };
+}
+
+message EmptyMessage{
+
+}
