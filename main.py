@@ -113,6 +113,8 @@ class Signal:
         input_text = input_text.lower()
         buf = io.StringIO()
         for ch in input_text:
+            if ch == " ":
+                continue
             if ch not in ABC:
                 return ""
             buf.write(ABC[ch])
@@ -142,7 +144,7 @@ class Signal:
 
 def main() -> None:
     signal = Signal()
-    signal.make_output_sound("кто")
+    signal.make_output_sound("а")
     print("Конец")
 
 
