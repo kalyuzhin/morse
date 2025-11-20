@@ -4,6 +4,8 @@ import math
 import enum
 import struct
 
+from typing import Literal, Dict, List
+
 
 class Sign(enum.Enum):
     DASH = "dash"
@@ -12,7 +14,7 @@ class Sign(enum.Enum):
     SPACE = "space"
 
 
-ABC: dict[chr, str] = {
+ABC: Dict[chr, str] = {
     'а': ".-",
     'б': "-...",
     'в': ".--",
@@ -46,11 +48,11 @@ ABC: dict[chr, str] = {
     'я': ".-.-",
 }
 
-SAMPLE_RATE = 44100
+SAMPLE_RATE: Literal[22050, 44100, 48000, 96000] = 44100
 DOT_DURATION = 0.1
 DASH_DURATION = DOT_DURATION * 3
-PAUSE_BETWEEN_LETTERS = 0.5
-PAUSE_BETWEEN_WORDS = 0.5
+PAUSE_BETWEEN_LETTERS = 0.1
+PAUSE_BETWEEN_WORDS = 0.4
 
 
 def create_wave(raw_bytes: bytes) -> None:
@@ -60,27 +62,38 @@ def create_wave(raw_bytes: bytes) -> None:
 
 
 class Signal:
-    def __init__(self):
-        self.sample_rate = SAMPLE_RATE
-        self.dot_duration = DOT_DURATION
-        self.dash_duration = DASH_DURATION
-        self.pause_between_words = PAUSE_BETWEEN_WORDS
-        self.pause_between_letters = PAUSE_BETWEEN_LETTERS
+    def __init__(self, frequency: int = 180, amplitude: float = 1) -> None:
+        self.sample_rate: Literal[22050, 44100, 48000, 96000] = SAMPLE_RATE
+        self.dot_duration: float = DOT_DURATION
+        self.dash_duration: float = DASH_DURATION
+        self.pause_between_words: float = PAUSE_BETWEEN_WORDS
+        self.pause_between_letters: float = PAUSE_BETWEEN_LETTERS
+        self.frequency: int = frequency
+        self.amplitude: float = amplitude
 
     @staticmethod
     def get_sine(amp: float, duration: float, frequency: int) -> float:
         return amp * math.sin(2 * math.pi * duration * frequency)
 
     @staticmethod
-    def convert(ys: list[float]) -> bytes:
+    def convert(ys: List[float]) -> bytes:
         samples = [round(sample * 32767) for sample in ys]
         raw_int = struct.pack("<%dh" % len(samples), *samples)
 
         return raw_int
 
     def make_bytes(self, amp: float, frequency: int, input_type: Sign) -> bytes:
-        duration: float = self.dot_duration if input_type in (Sign.DOT, Sign.HUSH) else self.dash_duration
-        ys: list[float] = []
+        duration: float = 0
+        if input_type == Sign.DOT:
+            duration = self.dot_duration
+        elif input_type == Sign.HUSH:
+            duration = self.pause_between_letters
+        elif input_type == Sign.SPACE:
+            duration = self.pause_between_words
+        elif input_type == Sign.DASH:
+            duration = self.dash_duration
+
+        ys: List[float] = []
 
         for i in range(int(SAMPLE_RATE * duration)):
             t = (i + 0.0) / SAMPLE_RATE
@@ -113,13 +126,13 @@ class Signal:
 
         for ch in morse_code:
             if ch == ".":
-                tmp = self.make_bytes(1, 180, Sign.DOT)
+                tmp = self.make_bytes(1, self.frequency, Sign.DOT)
             elif ch == "-":
-                tmp = self.make_bytes(1, 180, Sign.DASH)
+                tmp = self.make_bytes(1, self.frequency, Sign.DASH)
             elif ch == " ":
-                tmp = self.make_bytes(0, 180, Sign.SPACE)
+                tmp = self.make_bytes(0, self.frequency, Sign.SPACE)
             b.extend(tmp)
-            tmp = self.make_bytes(0, 180, Sign.HUSH)
+            tmp = self.make_bytes(0, self.frequency, Sign.HUSH)
             b.extend(tmp)
 
         self.make_wave(b)
@@ -129,7 +142,7 @@ class Signal:
 
 def main() -> None:
     signal = Signal()
-    signal.make_output_sound("Как")
+    signal.make_output_sound("кто")
     print("Конец")
 
 
