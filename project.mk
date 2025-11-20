@@ -1,5 +1,5 @@
 CURRENT_DIR=$(shell pwd)
-PROTO_DIR=$(CURRENT_DIR)/api
+PROTO_DIR=$(CURRENT_DIR)/proto
 PROTO_FILE=$(PROTO_DIR)/morse.proto
 PB_DIR=$(CURRENT_DIR)/pb
 
