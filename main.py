@@ -49,9 +49,9 @@ ABC: Dict[chr, str] = {
 }
 
 SAMPLE_RATE: Literal[22050, 44100, 48000, 96000] = 44100
-DOT_DURATION = 0.1
+DOT_DURATION = 0.12
 DASH_DURATION = DOT_DURATION * 3
-PAUSE_BETWEEN_LETTERS = 0.1
+PAUSE_BETWEEN_LETTERS = 0.12
 PAUSE_BETWEEN_WORDS = 0.4
 
 
@@ -73,7 +73,7 @@ class Signal:
 
     @staticmethod
     def get_sine(amp: float, duration: float, frequency: int) -> float:
-        return amp * math.sin(2 * math.pi * duration * frequency)
+        return amp * math.sin(2 * math.pi * duration * frequency)  # можно попробовать numpy
 
     @staticmethod
     def convert(ys: List[float]) -> bytes:
@@ -95,7 +95,7 @@ class Signal:
 
         ys: List[float] = []
 
-        for i in range(int(SAMPLE_RATE * duration)):
+        for i in range(int(SAMPLE_RATE * duration)):  # опять же, можно переписать без цикла (чисто numpy)
             t = (i + 0.0) / SAMPLE_RATE
             y = self.get_sine(amp, t, frequency)
             ys.append(y)
@@ -128,7 +128,7 @@ class Signal:
 
         for ch in morse_code:
             if ch == ".":
-                tmp = self.make_bytes(1, self.frequency, Sign.DOT)
+                tmp = self.make_bytes(1, self.frequency, Sign.DOT)  # лишние операции
             elif ch == "-":
                 tmp = self.make_bytes(1, self.frequency, Sign.DASH)
             elif ch == " ":
@@ -146,7 +146,7 @@ def main() -> None:
     # TODO: довольно медленно работает с большими предложениями
     # TODO: возможно, стоит использовать numpy, пересмотреть, где я создаю временные объекты и минимизировать это
     signal = Signal()
-    signal.make_output_sound("а")
+    signal.make_output_sound("Амалия")
     print("Конец")
 
 
